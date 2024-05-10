@@ -55,7 +55,8 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 uint8_t tx_data[20] = "\n\rLocksys\n\r";
-uint8_t rx_data[20] = "\n\rtest";
+uint8_t rx_data[1];
+uint8_t rx_data_RFID[1];
 /* USER CODE END 0 */
 
 /**
@@ -88,10 +89,13 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data));
   HAL_UART_Transmit(&huart1, tx_data, sizeof(tx_data), 1000);
+
+  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
 
   /* USER CODE END 2 */
 
@@ -100,8 +104,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	  HAL_UART_Transmit_IT(&huart1, tx_data, sizeof(tx_data));
-	  HAL_Delay(1000);
+	  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
 
     /* USER CODE BEGIN 3 */
 
@@ -155,11 +158,11 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data)); //You need to toggle a breakpoint on this line!
-  HAL_UART_Transmit(&huart1, rx_data, sizeof(rx_data), 1000);
+  //HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data)); //PUTTY
+  //HAL_UART_Transmit(&huart1, rx_data, sizeof(rx_data), 1000); //PUTTY
+  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
+  HAL_UART_Transmit(&huart1, rx_data_RFID, sizeof(rx_data_RFID), 1000);
 }
-/* USER CODE END 4 */
-
 /* USER CODE END 4 */
 
 /**
