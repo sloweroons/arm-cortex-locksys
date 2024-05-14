@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -33,7 +35,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define ESCAPE_WHITE   "\033[37m"
+#define ESCAPE_GREEN   "\033[32m"
+#define ESCAPE_YELLOW  "\033[33m"
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,9 +58,9 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-uint8_t tx_data[20] = "\n\rLocksys\n\r";
+uint8_t tx_data[40] = ESCAPE_GREEN "\n\rLocksys - " ESCAPE_WHITE __TIME__ "\n\r";
 uint8_t rx_data[1];
-uint8_t rx_data_RFID[1];
+uint8_t spi_RFID[100];
 /* USER CODE END 0 */
 
 /**
@@ -89,13 +93,20 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART1_UART_Init();
-  MX_USART2_UART_Init();
+  MX_I2C1_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
 
+  // USART
   HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data));
   HAL_UART_Transmit(&huart1, tx_data, sizeof(tx_data), 1000);
 
-  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
+  // RFID
+  HAL_GPIO_WritePin(uSPI1_SS_GPIO_Port, uSPI1_SS_Pin, GPIO_PIN_SET);
+  HAL_SPI_Receive_IT(&hspi1, spi_RFID, sizeof(spi_RFID));
+
+  // LED
+  HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 
   /* USER CODE END 2 */
 
@@ -103,11 +114,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  keypadLogic();
     /* USER CODE END WHILE */
-	  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
 
     /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 }
@@ -154,14 +164,60 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void keypadLogic() {
+	// COL 1
+	HAL_GPIO_TogglePin(GPIOG, MK_Output_1_Pin);
 
-/* USER CODE BEGIN 4 */
+	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_1_Pin) == GPIO_PIN_SET)
+	{
+		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "1\n\r";
+		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	} else
+	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_2_Pin) == GPIO_PIN_SET)
+	{
+		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "4\n\r";
+		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	} else
+	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_3_Pin) == GPIO_PIN_SET)
+	{
+		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "7\n\r";
+		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	} else
+	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_4_Pin) == GPIO_PIN_SET)
+	{
+		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "#\n\r";
+		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	}
+
+	HAL_GPIO_TogglePin(GPIOG, MK_Output_1_Pin);
+	return;
+}
+
+void toggleLED() {
+	HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_13);
+	HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-  //HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data)); //PUTTY
-  //HAL_UART_Transmit(&huart1, rx_data, sizeof(rx_data), 1000); //PUTTY
-  HAL_UART_Receive_IT(&huart2, rx_data_RFID, sizeof(rx_data_RFID));
-  HAL_UART_Transmit(&huart1, rx_data_RFID, sizeof(rx_data_RFID), 1000);
+	//COM5
+	HAL_UART_Receive_IT(&huart1, rx_data, sizeof(rx_data));
+	//HAL_UART_Transmit(&huart1, rx_data, sizeof(rx_data), 1000);
+
+	uint8_t message[40] = ESCAPE_YELLOW "Interrupt - COM5 - " ESCAPE_WHITE __TIME__ "\n\r";
+	HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	toggleLED();
+}
+
+void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef * hspi)
+{
+	//RFID
+	HAL_SPI_Receive_IT(&hspi1, spi_RFID, sizeof(spi_RFID));
+
+	//HAL_UART_Transmit(&hspi1, spi_RFID, sizeof(spi_RFID), 1000);
+	uint8_t message[40] = ESCAPE_YELLOW "Interrupt - RFID - " ESCAPE_WHITE __TIME__ "\n\r";
+	HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
+	toggleLED();
 }
 /* USER CODE END 4 */
 

@@ -53,10 +53,27 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void toggleLED();
+void keypadLogic();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define MK_Input_4_Pin GPIO_PIN_15
+#define MK_Input_4_GPIO_Port GPIOC
+#define MK_Output_3_Pin GPIO_PIN_0
+#define MK_Output_3_GPIO_Port GPIOF
+#define MK_Input_3_Pin GPIO_PIN_1
+#define MK_Input_3_GPIO_Port GPIOF
+#define MK_Output_2_Pin GPIO_PIN_2
+#define MK_Output_2_GPIO_Port GPIOF
+#define MK_Input_2_Pin GPIO_PIN_3
+#define MK_Input_2_GPIO_Port GPIOF
+#define MK_Output_1_Pin GPIO_PIN_4
+#define MK_Output_1_GPIO_Port GPIOF
+#define MK_Input_1_Pin GPIO_PIN_5
+#define MK_Input_1_GPIO_Port GPIOF
+#define uSPI1_SS_Pin GPIO_PIN_4
+#define uSPI1_SS_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
