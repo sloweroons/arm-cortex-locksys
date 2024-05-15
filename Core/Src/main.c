@@ -48,6 +48,21 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+uint8_t status;
+uint8_t str[16];
+uint8_t serNum[5];
+uint8_t key;
+
+uint8_t Key_Card[4]  = {};
+uint8_t Key_Card2[4] = {};
+
+uint8_t  KEY[] = {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF};
+uint8_t  KEY2[]={1,2,3,4,5,6};
+
+uint8_t test;
+uint8_t W[]="zagros-elec";
+uint8_t R[16];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,8 +117,9 @@ int main(void)
   HAL_UART_Transmit(&huart1, tx_data, sizeof(tx_data), 1000);
 
   // RFID
-  HAL_GPIO_WritePin(uSPI1_SS_GPIO_Port, uSPI1_SS_Pin, GPIO_PIN_SET);
-  HAL_SPI_Receive_IT(&hspi1, spi_RFID, sizeof(spi_RFID));
+  //MFRC522_Init();
+  //HAL_GPIO_WritePin(uSPI1_SS_GPIO_Port, uSPI1_SS_Pin, GPIO_PIN_SET);
+  //HAL_SPI_Receive_IT(&hspi1, spi_RFID, sizeof(spi_RFID));
 
   // LED
   HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
@@ -115,6 +131,32 @@ int main(void)
   while (1)
   {
 	  keypadLogic();
+
+		//status = MFRC522_Request(PICC_REQIDL, str);	//MFRC522_Request(0x26, str)
+		//status = MFRC522_Anticoll(str);	//Take a collision, look up 5 bytes
+		//memcpy(serNum, str, 5);//function for c language:(para1:that place save data,para2:the the source of data,para3:size)
+
+		//if (status == MI_OK)
+		//{
+
+		//*******************************Read and write on block tag*************************//
+
+			//MFRC522_SelectTag(str);
+			//test =	MFRC522_Auth(PICC_AUTHENT1A,24,KEY,serNum);
+
+			//if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_11)==0)
+			//{
+			//	status = MFRC522_Write((uint8_t)24 , W);
+			//}
+
+			//if(HAL_GPIO_ReadPin(GPIOA,GPIO_PIN_12)==0)
+			//{
+				//HAL_Delay(2000);
+				//status = MFRC522_Read( 24, R);
+			//}
+		//}
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -165,31 +207,32 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 void keypadLogic() {
-	// COL 1
-	HAL_GPIO_TogglePin(GPIOG, MK_Output_1_Pin);
+	HAL_GPIO_WritePin(GPIOF, MK_Output_3_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOF, MK_Output_2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOF, MK_Output_1_Pin, GPIO_PIN_SET);
 
-	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_1_Pin) == GPIO_PIN_SET)
+	if (HAL_GPIO_ReadPin(GPIOF, MK_Input_1_Pin) == GPIO_PIN_SET)
 	{
 		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "1\n\r";
 		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
 	} else
-	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_2_Pin) == GPIO_PIN_SET)
+	if (HAL_GPIO_ReadPin(GPIOF, MK_Input_2_Pin) == GPIO_PIN_SET)
 	{
 		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "4\n\r";
 		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
 	} else
-	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_3_Pin) == GPIO_PIN_SET)
+	if (HAL_GPIO_ReadPin(GPIOF, MK_Input_3_Pin) == GPIO_PIN_SET)
 	{
 		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "7\n\r";
 		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
 	} else
-	if (HAL_GPIO_ReadPin(GPIOG, MK_Input_4_Pin) == GPIO_PIN_SET)
+	if (HAL_GPIO_ReadPin(MK_Input_4_GPIO_Port, MK_Input_4_Pin) == GPIO_PIN_SET)
 	{
 		uint8_t message[40] = ESCAPE_YELLOW "PIN: - " ESCAPE_WHITE "#\n\r";
 		HAL_UART_Transmit(&huart1, message, sizeof(message), 1000);
 	}
 
-	HAL_GPIO_TogglePin(GPIOG, MK_Output_1_Pin);
+	HAL_GPIO_WritePin(GPIOF, MK_Output_1_Pin, GPIO_PIN_RESET);
 	return;
 }
 

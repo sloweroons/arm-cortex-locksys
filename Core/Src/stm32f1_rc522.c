@@ -1,4 +1,9 @@
 #include "stm32f1_rc522.h"
+#include "main.h"
+#include "i2c.h"
+#include "spi.h"
+#include "usart.h"
+#include "gpio.h"
 
 /*
  * Ten ham:Write_MFRC5200
@@ -188,7 +193,7 @@ void MFRC522_Init(void)
 
 	//GPIO_SetBits(MFRC522_CS_GPIO,MFRC522_CS_PIN);						// Activate the RFID reader
 	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOB,GPIO_PIN_0,GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_4,GPIO_PIN_SET);
 	//GPIO_SetBits(MFRC522_RST_GPIO,MFRC522_RST_PIN);					// not reset
 
 		// spi config

@@ -72,8 +72,6 @@ void keypadLogic();
 #define MK_Output_1_GPIO_Port GPIOF
 #define MK_Input_1_Pin GPIO_PIN_5
 #define MK_Input_1_GPIO_Port GPIOF
-#define uSPI1_SS_Pin GPIO_PIN_4
-#define uSPI1_SS_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
 
