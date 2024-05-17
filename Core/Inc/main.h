@@ -55,6 +55,8 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 void toggleLED();
 void keypad_read();
+uint8_t dec_to_bcd(int);
+int bcd_to_dec(uint8_t);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

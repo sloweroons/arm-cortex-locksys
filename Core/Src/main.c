@@ -22,7 +22,6 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-#include "ds3231.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -40,6 +39,8 @@
 #define ESCAPE_GREEN   "\033[32m"
 #define ESCAPE_YELLOW  "\033[33m"
 #define ESCAPE_RED     "\033[31m"
+
+#define DS3231_ADDRESS 0xD0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -68,8 +69,44 @@ uint8_t rx_data[4];
 uint8_t code[4] = "1122";
 uint8_t en_keypad = 0;
 
-uint8_t time_set[7] = {0, 10, 13, 5, 25, 1, 21};
-uint8_t time_current[7];
+typedef struct Time {
+	uint8_t second;
+	uint8_t minute;
+	uint8_t hour;
+	uint8_t day;
+	uint8_t week;
+	uint8_t month;
+	uint8_t year;
+} Time;
+
+struct Time time;
+
+void set_time(uint8_t sec, uint8_t min, uint8_t h, uint8_t d, uint8_t w, uint8_t m, uint8_t y) {
+	uint8_t set[7];
+	set[0] = dec_to_bcd(sec);
+	set[1] = dec_to_bcd(min);
+	set[2] = dec_to_bcd(h);
+	set[3] = dec_to_bcd(d);
+	set[4] = dec_to_bcd(w);
+	set[5] = dec_to_bcd(m);
+	set[6] = dec_to_bcd(y);
+
+	HAL_I2C_Mem_Write(&hi2c1, DS3231_ADDRESS, 0x00, 1, set, 7, 1000);
+}
+
+void get_time() {
+	uint8_t get[7];
+	HAL_I2C_Mem_Read(&hi2c1, DS3231_ADDRESS, 0x00, 1, get, 7, 1000);
+	time.second = bcd_to_dec(get[1]);
+	time.minute = bcd_to_dec(get[2]);
+	time.hour = bcd_to_dec(get[3]);
+	time.day = bcd_to_dec(get[4]);
+	time.week = bcd_to_dec(get[5]);
+	time.month = bcd_to_dec(get[6]);
+	time.year = bcd_to_dec(get[7]);
+}
+
+
 //* USER CODE END 0 */
 
 /**
@@ -119,7 +156,9 @@ int main(void)
   HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 
   // RTC
-  ds3231_init(&time_set[0], CLOCK_HALT, FORCE_RESET);
+  //ds3231_init(&time_set[0], CLOCK_HALT, FORCE_RESET);
+  //set_time(0, 3, 19, 5, 17, 5, 24);
+
 
   /* USER CODE END 2 */
 
@@ -127,12 +166,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if (en_keypad == 1) {
-		  keypad_read();
-	  }
-	  ds3231_read(TIME, time_current);
-	  HAL_UART_Transmit(&huart1, time_current, sizeof(time_current), 1000);
-	  HAL_Delay(1000);
+	if (en_keypad == 1) {
+	  keypad_read();
+	}
+
+	get_time();
+
+	HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -183,13 +223,14 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-void rtc_print(uint8_t *data_array, uint8_t array_length)
-{
-	for (int8_t index = array_length - 1; index >= 0; index--)
-	{
-		HAL_UART_Transmit(&huart1, data_array[index], sizeof(data_array[index]), 1000);
-	}
+uint8_t dec_to_bcd(int value) {
+	return (uint8_t)((value / 10 * 16) + (value % 10));
 }
+
+int bcd_to_dec(uint8_t value) {
+	return (int)((value / 16 * 10) + (value % 16));
+}
+
 
 void keypad_read() {
 	HAL_GPIO_WritePin(GPIOF, MK_Output_2_Pin, GPIO_PIN_RESET);

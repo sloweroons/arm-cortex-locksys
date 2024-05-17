@@ -1,5 +1,0 @@
-../Core/Src/ds3231_low_level.c:7:6:time_i2c_write_single	24	static
-../Core/Src/ds3231_low_level.c:14:6:time_i2c_write_multi	32	static
-../Core/Src/ds3231_low_level.c:24:6:time_i2c_read_single	24	static
-../Core/Src/ds3231_low_level.c:31:6:time_i2c_read_multi	32	static
-../Core/Src/ds3231_low_level.c:41:6:ds3231_I2C_init	4	static
