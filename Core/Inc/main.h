@@ -54,7 +54,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void toggleLED();
-void keypadLogic();
+void keypad_read();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
