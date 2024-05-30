@@ -1,0 +1,3 @@
+../Core/Src/mfrc522.c:18:6:MFRC522_init	1
+../Core/Src/mfrc522.c:22:6:MFRC522_write	1
+../Core/Src/mfrc522.c:26:6:MFRC522_read	1

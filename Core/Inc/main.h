@@ -53,10 +53,11 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void toggleLED();
+void toggleLock();
 void keypad_read();
 uint8_t dec_to_bcd(int);
 int bcd_to_dec(uint8_t);
+void check_code(uint8_t * data);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
